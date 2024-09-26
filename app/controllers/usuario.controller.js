@@ -41,6 +41,43 @@ exports.retrieveAllUsuarios = (req, res) => {
             });
         });
 };
+exports.updateById = async (req, res) => {
+    try {
+        let usuarioId = req.params.id_usuario;
+        let usuario = await Usuario.findByPk(usuarioId);
+
+        if (!usuario) {
+            res.status(404).json({
+                message: "No se encontró el usuario para actualizar con id = " + usuarioId,
+                usuario: "",
+                error: "404"
+            });
+        } else {
+            let updatedObject = {
+                nombre: req.body.nombre,
+                correo: req.body.correo,
+                contraseña: req.body.contraseña,
+            };
+            let result = await Usuario.update(updatedObject, { returning: true, where: { id_usuario: usuarioId } });
+
+            if (!result) {
+                res.status(500).json({
+                    message: "No se puede actualizar el usuario con id = " + req.params.id_usuario,
+                    error: "No se pudo actualizar el usuario",
+                });
+            }
+            res.status(200).json({
+                message: "Actualización exitosa del usuario con id = " + usuarioId,
+                usuario: updatedObject,
+            });
+        }
+    } catch (error) {
+        res.status(500).json({
+            message: "No se puede actualizar el usuario con id = " + req.params.id_usuario,
+            error: error.message
+        });
+    }
+};
 
 exports.deleteById = async (req, res) => {
     try {
